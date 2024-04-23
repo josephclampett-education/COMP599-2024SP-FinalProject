@@ -151,6 +151,7 @@ function configure() {
 	uniform_P = webgl_context.getUniformLocation(program, "P");
 	uniform_light = webgl_context.getUniformLocation(program, "light");
     uniform_eye = webgl_context.getUniformLocation(program, "eye");
+    uniform_color = webgl_context.getUniformLocation(program, "color");
 
     webgl_context.enable( webgl_context.DEPTH_TEST );
 }
@@ -167,17 +168,15 @@ function createVertexData()
         vertex_data[row++] = V_p[ F_p[i][0] ];
         vertex_data[row++] = V_p[ F_p[i][1] ];
         vertex_data[row++] = V_p[ F_p[i][2] ];
-        
     }
     
     mgs_index = vertex_data.length;
     
-    for ( let i=0; i<F_s.length; i++ ) {
-        
+    for ( let i=0; i<F_s.length; i++ ) 
+    {    
         vertex_data[row++] = V_s[ F_s[i][0] ];
         vertex_data[row++] = V_s[ F_s[i][1] ];
         vertex_data[row++] = V_s[ F_s[i][2] ];
-        
     }
 }
 
@@ -224,6 +223,12 @@ function allocateMemory()
     webgl_context.enableVertexAttribArray( attr_vertex );
     webgl_context.bufferData( webgl_context.ARRAY_BUFFER, flatten(vertex_data), webgl_context.STATIC_DRAW );
     
+	let normal_id = webgl_context.createBuffer();
+
+ 	webgl_context.bindBuffer(webgl_context.ARRAY_BUFFER, normal_id);
+    webgl_context.vertexAttribPointer(attr_normal, size, webgl_context.FLOAT, false, 0, 0);
+    webgl_context.enableVertexAttribArray(attr_normal);
+    webgl_context.bufferData(webgl_context.ARRAY_BUFFER, flatten(normal_data), webgl_context.STATIC_DRAW);
 }
 
 // ----------------------------------------------
@@ -244,6 +249,19 @@ function draw()
     let light = vec3(lxt, lyt, lzt);
 
     webgl_context.uniformVector4fv(uniform_light, light);
+
+    // ==============================================
+    // Camera setup
+    // ==============================================
+    
+
+    // ==============================================
+    // Render Mars
+    // ==============================================
+
+    // ==============================================
+    // Render MGS
+    // ==============================================
 }
 
 createVertexData();
