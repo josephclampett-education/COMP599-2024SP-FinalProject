@@ -4,7 +4,21 @@ console.clear();
 // create variables used in your program
 // ----------------------------------------------
 
-
+let webgl_context = null;
+let attr_vertex = null;
+let attr_normal = null;
+let uniform__color = null;
+let uniform_view = null;
+let uniform_perspective = null;
+let uniform_light = null;
+let uniform_eye = null;
+let vertex_data = [];
+let normal_data = [];
+let canvas = null;
+let program = null;
+let count = 2;
+let size = 3;
+let mgs_index = 0;
 
 // ----------------------------------------------
 // camera parameters
@@ -190,13 +204,7 @@ function createNormalData() {
 
     let row = 0;
     
-    // ----------------------------------------------
-    // Task 2: put code below.
-    // ----------------------------------------------
-      
-      //normal_data = []
-    
-    for (let i = 0; i < axis_index; i += 3) {
+    for (let i = 0; i < vertex_data.length; i += 3) {
         let normal = normalize(
         cross(
           subtract(vertex_data[i+1], vertex_data[i]),
@@ -236,19 +244,31 @@ function allocateMemory()
 // ----------------------------------------------
 function draw() 
 {
-    let eye = vec3(xt, yt, zt);
+    let eye = vec4(xt, yt, zt, 0);
 
-    let V = lookAt(eye, at, up);
+    // Not happy about having to do an extra vec3 here but eye has to be a vec4 so it is what it is
+    let V = lookAt(vec3(xt,yt,zt), at, up);
     
     let P = perspective(fov, 1.0, 0.3, 3.0);
 
     webgl_context.uniformMatrix4fv(uniform_V, false, flatten(V));
     webgl_context.uniformMatrix4fv(uniform_P, false, flatten(P));
-    webgl_context.uniformVector4fv(uniform_eye, eye);
+    webgl_context.uniform4fv(uniform_eye, eye);
 
-    let light = vec3(lxt, lyt, lzt);
+    let light = vec4(lxt, lyt, lzt, 0);
 
-    webgl_context.uniformVector4fv(uniform_light, light);
+    webgl_context.uniform4fv(uniform_light, light);
+    
+
+    // ==============================================
+    // Animation
+    // ==============================================
+    
+    // Temporary props+transform setting because it doesn't work without setting them
+    // Get rid of these when handling transform manually
+    webgl_context.uniform4f(uniform_props, 0,0,0,1.0);
+    webgl_context.uniform4f(uniform_trans, 0,0,0,0);
+
 
     // ==============================================
     // Camera setup
@@ -259,12 +279,27 @@ function draw()
     // Render Mars
     // ==============================================
 
+    // Set Mars transform
+    // Set Mars props [xang, yang, zang, scale]
+
+    // Draw Mars
+    webgl_context.uniform4f( uniform_color, 0.70, 0.13, 0.13, 1.0 );
+    webgl_context.drawArrays( webgl_context.TRIANGLES, 0, mgs_index );
+
     // ==============================================
     // Render MGS
     // ==============================================
+
+    // Set MGS transform
+    // Set MGS props [xang, yang, zang, scale]
+    
+    // Draw MGS
+    webgl_context.uniform4f( uniform_color, 1.0, 0.84, 0.0, 1.0 );
+    webgl_context.drawArrays( webgl_context.TRIANGLES, mgs_index, vertex_data.length - mgs_index );
 }
 
 createVertexData();
+createNormalData();
 configure();
 allocateMemory();
 setInterval(draw, 100);
