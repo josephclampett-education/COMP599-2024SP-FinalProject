@@ -181,6 +181,36 @@ function createVertexData()
     }
 }
 
+
+
+// ----------------------------------------------
+// create normal data  
+// ----------------------------------------------
+
+function createNormalData() {
+
+    let row = 0;
+    
+    // ----------------------------------------------
+    // Task 2: put code below.
+    // ----------------------------------------------
+      
+      //normal_data = []
+    
+    for (let i = 0; i < axis_index; i += 3) {
+        let normal = normalize(
+        cross(
+          subtract(vertex_data[i+1], vertex_data[i]),
+          subtract(vertex_data[i+2], vertex_data[i])
+          )
+          );
+        normal_data[row++] = normal;
+        normal_data[row++] = normal;
+        normal_data[row++] = normal;
+    }
+  
+  }
+
 // ----------------------------------------------
 // Allocate memory and load data.
 // ----------------------------------------------
