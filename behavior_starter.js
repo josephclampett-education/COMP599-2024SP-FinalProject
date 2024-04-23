@@ -168,17 +168,15 @@ function createVertexData()
         vertex_data[row++] = V_p[ F_p[i][0] ];
         vertex_data[row++] = V_p[ F_p[i][1] ];
         vertex_data[row++] = V_p[ F_p[i][2] ];
-        
     }
     
     mgs_index = vertex_data.length;
     
-    for ( let i=0; i<F_s.length; i++ ) {
-        
+    for ( let i=0; i<F_s.length; i++ ) 
+    {    
         vertex_data[row++] = V_s[ F_s[i][0] ];
         vertex_data[row++] = V_s[ F_s[i][1] ];
         vertex_data[row++] = V_s[ F_s[i][2] ];
-        
     }
 }
 
@@ -225,6 +223,7 @@ function draw()
     // ==============================================
     // Camera setup
     // ==============================================
+    
 
     // ==============================================
     // Render Mars
