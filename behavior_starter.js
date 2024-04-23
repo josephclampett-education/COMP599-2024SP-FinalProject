@@ -260,9 +260,6 @@ function draw() {
     // Animation
     // ==============================================
 
-    // Temporary props+transform setting because it doesn't work without setting them
-    // Get rid of these when handling transform manually
-
 
     // ==============================================
     // Camera setup
