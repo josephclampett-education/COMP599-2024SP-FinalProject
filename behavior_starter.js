@@ -39,9 +39,9 @@ let lzt = 1.0;
 // orbit dynamic parameters
 // ----------------------------------------------
 let orbit_speed = 0;
-let orbit_speed_crd = 3; 
-let orbit_radius_crd = 0.65; 
-let orbit_angle_crd = 45; 
+let orbit_speed_crd = 3;
+let orbit_radius_crd = 0.65;
+let orbit_angle_crd = 45;
 
 // ----------------------------------------------
 // camera orientation parameters
@@ -127,9 +127,9 @@ document.getElementById("reset_cl").addEventListener("click", function (e) {
 });
 
 document.getElementById("reset_ss").addEventListener("click", function (e) {
-    orbit_speed_crd = 3; 
-    orbit_radius_crd = 0.65; 
-    orbit_angle_crd = 45; 
+    orbit_speed_crd = 3;
+    orbit_radius_crd = 0.65;
+    orbit_angle_crd = 45;
     document.getElementById("os").value = orbit_speed_crd;
     document.getElementById("os_crd").innerHTML = " = " + orbit_speed_crd;
     document.getElementById("od").value = orbit_radius_crd;
@@ -147,50 +147,48 @@ document.getElementById("reset_ss").addEventListener("click", function (e) {
 // Configure web-gl context
 // ----------------------------------------------
 function configure() {
-    
-    canvas = document.getElementById( "webgl-canvas" );
-    
-    webgl_context = canvas.getContext( "webgl" );
-    program = initShaders( webgl_context, "vertex-shader", "fragment-shader" );
-    webgl_context.useProgram( program );
-    
-    webgl_context.viewport( 0, 0, canvas.width, canvas.height );
-       
-	attr_vertex = webgl_context.getAttribLocation(program, "vertex");
-	attr_normal = webgl_context.getAttribLocation(program, "normal");
-    
-	uniform_props = webgl_context.getUniformLocation(program, "props");
-	uniform_trans = webgl_context.getUniformLocation(program, "trans");
-	uniform_V = webgl_context.getUniformLocation(program, "V");
-	uniform_P = webgl_context.getUniformLocation(program, "P");
-	uniform_light = webgl_context.getUniformLocation(program, "light");
+
+    canvas = document.getElementById("webgl-canvas");
+
+    webgl_context = canvas.getContext("webgl");
+    program = initShaders(webgl_context, "vertex-shader", "fragment-shader");
+    webgl_context.useProgram(program);
+
+    webgl_context.viewport(0, 0, canvas.width, canvas.height);
+
+    attr_vertex = webgl_context.getAttribLocation(program, "vertex");
+    attr_normal = webgl_context.getAttribLocation(program, "normal");
+
+    uniform_props = webgl_context.getUniformLocation(program, "props");
+    uniform_trans = webgl_context.getUniformLocation(program, "trans");
+    uniform_V = webgl_context.getUniformLocation(program, "V");
+    uniform_P = webgl_context.getUniformLocation(program, "P");
+    uniform_light = webgl_context.getUniformLocation(program, "light");
     uniform_eye = webgl_context.getUniformLocation(program, "eye");
     uniform_color = webgl_context.getUniformLocation(program, "color");
 
-    webgl_context.enable( webgl_context.DEPTH_TEST );
+    webgl_context.enable(webgl_context.DEPTH_TEST);
 }
 
 // ----------------------------------------------
 // Create vertex data  
 // ----------------------------------------------
-function createVertexData() 
-{
+function createVertexData() {
     let row = 0;
-    
-    for ( let i=0; i<F_p.length; i++ ) {
-        
-        vertex_data[row++] = V_p[ F_p[i][0] ];
-        vertex_data[row++] = V_p[ F_p[i][1] ];
-        vertex_data[row++] = V_p[ F_p[i][2] ];
+
+    for (let i = 0; i < F_p.length; i++) {
+
+        vertex_data[row++] = V_p[F_p[i][0]];
+        vertex_data[row++] = V_p[F_p[i][1]];
+        vertex_data[row++] = V_p[F_p[i][2]];
     }
-    
+
     mgs_index = vertex_data.length;
-    
-    for ( let i=0; i<F_s.length; i++ ) 
-    {    
-        vertex_data[row++] = V_s[ F_s[i][0] ];
-        vertex_data[row++] = V_s[ F_s[i][1] ];
-        vertex_data[row++] = V_s[ F_s[i][2] ];
+
+    for (let i = 0; i < F_s.length; i++) {
+        vertex_data[row++] = V_s[F_s[i][0]];
+        vertex_data[row++] = V_s[F_s[i][1]];
+        vertex_data[row++] = V_s[F_s[i][2]];
     }
 }
 
@@ -203,37 +201,36 @@ function createVertexData()
 function createNormalData() {
 
     let row = 0;
-    
+
     for (let i = 0; i < vertex_data.length; i += 3) {
         let normal = normalize(
-        cross(
-          subtract(vertex_data[i+1], vertex_data[i]),
-          subtract(vertex_data[i+2], vertex_data[i])
-          )
-          );
+            cross(
+                subtract(vertex_data[i + 1], vertex_data[i]),
+                subtract(vertex_data[i + 2], vertex_data[i])
+            )
+        );
         normal_data[row++] = normal;
         normal_data[row++] = normal;
         normal_data[row++] = normal;
     }
-  
-  }
+
+}
 
 // ----------------------------------------------
 // Allocate memory and load data.
 // ----------------------------------------------
 
-function allocateMemory() 
-{    
+function allocateMemory() {
     let buffer_id = webgl_context.createBuffer();
-    
-    webgl_context.bindBuffer( webgl_context.ARRAY_BUFFER, buffer_id );
-    webgl_context.vertexAttribPointer( attr_vertex, size, webgl_context.FLOAT, false, 0, 0 );
-    webgl_context.enableVertexAttribArray( attr_vertex );
-    webgl_context.bufferData( webgl_context.ARRAY_BUFFER, flatten(vertex_data), webgl_context.STATIC_DRAW );
-    
-	let normal_id = webgl_context.createBuffer();
 
- 	webgl_context.bindBuffer(webgl_context.ARRAY_BUFFER, normal_id);
+    webgl_context.bindBuffer(webgl_context.ARRAY_BUFFER, buffer_id);
+    webgl_context.vertexAttribPointer(attr_vertex, size, webgl_context.FLOAT, false, 0, 0);
+    webgl_context.enableVertexAttribArray(attr_vertex);
+    webgl_context.bufferData(webgl_context.ARRAY_BUFFER, flatten(vertex_data), webgl_context.STATIC_DRAW);
+
+    let normal_id = webgl_context.createBuffer();
+
+    webgl_context.bindBuffer(webgl_context.ARRAY_BUFFER, normal_id);
     webgl_context.vertexAttribPointer(attr_normal, size, webgl_context.FLOAT, false, 0, 0);
     webgl_context.enableVertexAttribArray(attr_normal);
     webgl_context.bufferData(webgl_context.ARRAY_BUFFER, flatten(normal_data), webgl_context.STATIC_DRAW);
@@ -242,13 +239,12 @@ function allocateMemory()
 // ----------------------------------------------
 // Run the pipeline and draw our mesh
 // ----------------------------------------------
-function draw() 
-{
+function draw() {
     let eye = vec4(xt, yt, zt, 0);
 
     // Not happy about having to do an extra vec3 here but eye has to be a vec4 so it is what it is
-    let V = lookAt(vec3(xt,yt,zt), at, up);
-    
+    let V = lookAt(vec3(xt, yt, zt), at, up);
+
     let P = perspective(fov, 1.0, 0.3, 3.0);
 
     webgl_context.uniformMatrix4fv(uniform_V, false, flatten(V));
@@ -258,44 +254,46 @@ function draw()
     let light = vec4(lxt, lyt, lzt, 0);
 
     webgl_context.uniform4fv(uniform_light, light);
-    
+
 
     // ==============================================
     // Animation
     // ==============================================
-    
+
     // Temporary props+transform setting because it doesn't work without setting them
     // Get rid of these when handling transform manually
-    webgl_context.uniform4f(uniform_props, 0,0,0,1.0);
-    webgl_context.uniform4f(uniform_trans, 0,0,0,0);
 
 
     // ==============================================
     // Camera setup
     // ==============================================
-    
+
 
     // ==============================================
     // Render Mars
     // ==============================================
 
     // Set Mars transform
+    webgl_context.uniform4f(uniform_props, 0, 0, 0, 1.0);
     // Set Mars props [xang, yang, zang, scale]
+    webgl_context.uniform4f(uniform_trans, 0, 0, 0, 0);
 
     // Draw Mars
-    webgl_context.uniform4f( uniform_color, 0.70, 0.13, 0.13, 1.0 );
-    webgl_context.drawArrays( webgl_context.TRIANGLES, 0, mgs_index );
+    webgl_context.uniform4f(uniform_color, 0.70, 0.13, 0.13, 1.0);
+    webgl_context.drawArrays(webgl_context.TRIANGLES, 0, mgs_index);
 
     // ==============================================
     // Render MGS
     // ==============================================
 
     // Set MGS transform
+    webgl_context.uniform4f(uniform_props, 0, 0, 0, 0.3);
     // Set MGS props [xang, yang, zang, scale]
-    
+    webgl_context.uniform4f(uniform_trans, 0, 0, 0, 0);
+
     // Draw MGS
-    webgl_context.uniform4f( uniform_color, 1.0, 0.84, 0.0, 1.0 );
-    webgl_context.drawArrays( webgl_context.TRIANGLES, mgs_index, vertex_data.length - mgs_index );
+    webgl_context.uniform4f(uniform_color, 1.0, 0.84, 0.0, 1.0);
+    webgl_context.drawArrays(webgl_context.TRIANGLES, mgs_index, vertex_data.length - mgs_index);
 }
 
 createVertexData();
