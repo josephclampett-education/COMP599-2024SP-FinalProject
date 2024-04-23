@@ -162,20 +162,22 @@ function createVertexData()
 {
     let row = 0;
     
-    for ( let i=0; i<F.length; i++ ) 
-    {
+    for ( let i=0; i<F_p.length; i++ ) {
         
-        vertex_data[row++] = V[ F[i][0] ];
-        vertex_data[row++] = V[ F[i][1] ];
-        vertex_data[row++] = V[ F[i][2] ];
+        vertex_data[row++] = V_p[ F_p[i][0] ];
+        vertex_data[row++] = V_p[ F_p[i][1] ];
+        vertex_data[row++] = V_p[ F_p[i][2] ];
         
     }
     
-    axis_index = vertex_data.length;
+    mgs_index = vertex_data.length;
     
-    for ( let i=0; i<A.length; i++ ) 
-    {
-        vertex_data[row++] = A[i];
+    for ( let i=0; i<F_s.length; i++ ) {
+        
+        vertex_data[row++] = V_s[ F_s[i][0] ];
+        vertex_data[row++] = V_s[ F_s[i][1] ];
+        vertex_data[row++] = V_s[ F_s[i][2] ];
+        
     }
 }
 
