@@ -19,6 +19,7 @@ let program = null;
 let count = 2;
 let size = 3;
 let mgs_index = 0;
+let mars_y_rot = 0;
 
 // ----------------------------------------------
 // camera parameters
@@ -239,8 +240,9 @@ function allocateMemory() {
 // ----------------------------------------------
 // Run the pipeline and draw our mesh
 // ----------------------------------------------
+
 function draw() {
-    let eye = vec4(xt, yt, zt, 0);
+     let eye = vec4(xt, yt, zt, 0);
 
     // Not happy about having to do an extra vec3 here but eye has to be a vec4 so it is what it is
     let V = lookAt(vec3(xt, yt, zt), at, up);
@@ -275,7 +277,12 @@ function draw() {
     // Set Mars props [xang, yang, zang, scale]
     webgl_context.uniform4f(uniform_trans, 0, 0, 0, 0);
 
+    // Mars self-rotation
+    mars_y_rot = (mars_y_rot + 1) % 360;  // Mars rotation angle increment
+    let mars_rot_y_rad = radians(mars_y_rot);
+
     // Draw Mars
+    webgl_context.uniform4f(uniform_props, 0, mars_rot_y_rad, 0, 1.0);
     webgl_context.uniform4f(uniform_color, 0.70, 0.13, 0.13, 1.0);
     webgl_context.drawArrays(webgl_context.TRIANGLES, 0, mgs_index);
 
@@ -288,7 +295,17 @@ function draw() {
     // Set MGS props [xang, yang, zang, scale]
     webgl_context.uniform4f(uniform_trans, 0, 0, 0, 0);
 
-    // Draw MGS
+    // Calculate MGS orbital position
+    orbit_speed = (orbit_speed + orbit_speed_crd) % 360;
+    let theta = radians(orbit_angle_crd);
+    let phi = radians(orbit_speed);
+    let x = orbit_radius_crd * Math.sin(theta) * Math.cos(phi);
+    let y = orbit_radius_crd * Math.sin(theta) * Math.sin(phi);
+    let z = orbit_radius_crd * Math.cos(theta);
+
+
+    // Draw MGS   
+    webgl_context.uniform4f(uniform_trans, x, y, z, 1.0);  
     webgl_context.uniform4f(uniform_color, 1.0, 0.84, 0.0, 1.0);
     webgl_context.drawArrays(webgl_context.TRIANGLES, mgs_index, vertex_data.length - mgs_index);
 }
@@ -298,10 +315,3 @@ createNormalData();
 configure();
 allocateMemory();
 setInterval(draw, 100);
-
-// uniform_props = webgl_context.getUniformLocation(program, "props");
-// uniform_trans = webgl_context.getUniformLocation(program, "trans");
-// uniform_V = webgl_context.getUniformLocation(program, "V");
-// uniform_P = webgl_context.getUniformLocation(program, "P");
-// uniform_light = webgl_context.getUniformLocation(program, "light");
-// uniform_eye = webgl_context.getUniformLocation(program, "eye");
