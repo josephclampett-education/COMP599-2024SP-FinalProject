@@ -299,7 +299,7 @@ function draw() {
     let theta = radians(orbit_speed);
     let x = orbit_radius_crd * Math.sin(theta) * Math.cos(phi);
     let y = orbit_radius_crd * Math.sin(theta) * Math.sin(phi);
-    let z = orbit_radius_crd * Math.cos(theta);
+    let z = Math.cos(theta);
 
 
     // Draw MGS   
