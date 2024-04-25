@@ -242,20 +242,18 @@ function allocateMemory() {
 // ----------------------------------------------
 
 function draw() {
-     let eye = vec4(xt, yt, zt, 0);
-
     // Not happy about having to do an extra vec3 here but eye has to be a vec4 so it is what it is
     let V = lookAt(vec3(xt, yt, zt), at, up);
-
     let P = perspective(fov, 1.0, 0.3, 3.0);
 
     webgl_context.uniformMatrix4fv(uniform_V, false, flatten(V));
     webgl_context.uniformMatrix4fv(uniform_P, false, flatten(P));
-    webgl_context.uniform4fv(uniform_eye, eye);
 
     let light = vec4(lxt, lyt, lzt, 0);
+    let eye = vec4(xt, yt, zt, 0);
 
     webgl_context.uniform4fv(uniform_light, light);
+    webgl_context.uniform4fv(uniform_eye, eye);
 
 
     // ==============================================
@@ -273,9 +271,9 @@ function draw() {
     // ==============================================
 
     // Set Mars transform
-    webgl_context.uniform4f(uniform_props, 0, 0, 0, 1.0);
-    // Set Mars props [xang, yang, zang, scale]
+    // webgl_context.uniform4f(uniform_props, 0, 0, 0, 1.0);
     webgl_context.uniform4f(uniform_trans, 0, 0, 0, 0);
+    // Set Mars props [xang, yang, zang, scale]
 
     // Mars self-rotation
     mars_y_rot = (mars_y_rot + 1) % 360;  // Mars rotation angle increment
@@ -292,13 +290,13 @@ function draw() {
 
     // Set MGS transform
     webgl_context.uniform4f(uniform_props, 0, 0, 0, 0.3);
-    // Set MGS props [xang, yang, zang, scale]
+    // // Set MGS props [xang, yang, zang, scale]
     webgl_context.uniform4f(uniform_trans, 0, 0, 0, 0);
 
     // Calculate MGS orbital position
     orbit_speed = (orbit_speed + orbit_speed_crd) % 360;
-    let theta = radians(orbit_angle_crd);
-    let phi = radians(orbit_speed);
+    let phi = radians(orbit_angle_crd);
+    let theta = radians(orbit_speed);
     let x = orbit_radius_crd * Math.sin(theta) * Math.cos(phi);
     let y = orbit_radius_crd * Math.sin(theta) * Math.sin(phi);
     let z = orbit_radius_crd * Math.cos(theta);
