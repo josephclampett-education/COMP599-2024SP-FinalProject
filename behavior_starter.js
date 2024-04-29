@@ -20,6 +20,7 @@ let count = 2;
 let size = 3;
 let mgs_index = 0;
 let mars_y_rot = 0;
+let mgs_y_rot = 0;
 
 // ----------------------------------------------
 // camera parameters
@@ -128,9 +129,9 @@ document.getElementById("reset_cl").addEventListener("click", function (e) {
 });
 
 document.getElementById("reset_ss").addEventListener("click", function (e) {
-    orbit_speed_crd = 3;
-    orbit_radius_crd = 0.65;
-    orbit_angle_crd = 45;
+    orbit_speed_crd = 3; 
+    orbit_radius_crd = 0.65; 
+    orbit_angle_crd = 45; 
     document.getElementById("os").value = orbit_speed_crd;
     document.getElementById("os_crd").innerHTML = " = " + orbit_speed_crd;
     document.getElementById("od").value = orbit_radius_crd;
@@ -148,27 +149,26 @@ document.getElementById("reset_ss").addEventListener("click", function (e) {
 // Configure web-gl context
 // ----------------------------------------------
 function configure() {
+    
+    canvas = document.getElementById( "webgl-canvas" );
+    
+    webgl_context = canvas.getContext( "webgl" );
+    program = initShaders( webgl_context, "vertex-shader", "fragment-shader" );
+    webgl_context.useProgram( program );
+    
+    webgl_context.viewport( 0, 0, canvas.width, canvas.height );
+       
+    attr_vertex = webgl_context.getAttribLocation( program, "vertex" );
+    attr_normal = webgl_context.getAttribLocation( program, "normal" );
+    uniform_color = webgl_context.getUniformLocation( program, "color" );
+    uniform_view = webgl_context.getUniformLocation( program, "V" );
+    uniform_perspective = webgl_context.getUniformLocation( program, "P" );
+    uniform_light = webgl_context.getUniformLocation( program, "light" );
+    uniform_props = webgl_context.getUniformLocation( program, "props" );
+    uniform_trans = webgl_context.getUniformLocation( program, "trans" );
+    
+    webgl_context.enable( webgl_context.DEPTH_TEST );
 
-    canvas = document.getElementById("webgl-canvas");
-
-    webgl_context = canvas.getContext("webgl");
-    program = initShaders(webgl_context, "vertex-shader", "fragment-shader");
-    webgl_context.useProgram(program);
-
-    webgl_context.viewport(0, 0, canvas.width, canvas.height);
-
-    attr_vertex = webgl_context.getAttribLocation(program, "vertex");
-    attr_normal = webgl_context.getAttribLocation(program, "normal");
-
-    uniform_props = webgl_context.getUniformLocation(program, "props");
-    uniform_trans = webgl_context.getUniformLocation(program, "trans");
-    uniform_V = webgl_context.getUniformLocation(program, "V");
-    uniform_P = webgl_context.getUniformLocation(program, "P");
-    uniform_light = webgl_context.getUniformLocation(program, "light");
-    uniform_eye = webgl_context.getUniformLocation(program, "eye");
-    uniform_color = webgl_context.getUniformLocation(program, "color");
-
-    webgl_context.enable(webgl_context.DEPTH_TEST);
 }
 
 // ----------------------------------------------
@@ -215,6 +215,15 @@ function createNormalData() {
         normal_data[row++] = normal;
     }
 
+    for ( let i=0; i < mgs_index; ) {
+        let v1 = subtract(vertex_data[i + 1], vertex_data[i]);
+        let v2 = subtract(vertex_data[i + 2], vertex_data[i]);
+        let nv = normalize(cross(v1, v2));
+        normal_data[i++] = nv;
+        normal_data[i++] = nv;
+        normal_data[i++] = nv;
+    }
+
 }
 
 // ----------------------------------------------
@@ -242,18 +251,16 @@ function allocateMemory() {
 // ----------------------------------------------
 
 function draw() {
-    // Not happy about having to do an extra vec3 here but eye has to be a vec4 so it is what it is
-    let V = lookAt(vec3(xt, yt, zt), at, up);
+    // Setup viewing and projection transformations
+    let eye = vec3(xt, yt, zt);
+    let V = lookAt(eye, at, up);
     let P = perspective(fov, 1.0, 0.3, 3.0);
+    webgl_context.uniformMatrix4fv(uniform_view, false, flatten(V));
+    webgl_context.uniformMatrix4fv(uniform_perspective, false, flatten(P));
 
-    webgl_context.uniformMatrix4fv(uniform_V, false, flatten(V));
-    webgl_context.uniformMatrix4fv(uniform_P, false, flatten(P));
-
+    // Setup lighting
     let light = vec4(lxt, lyt, lzt, 0);
-    let eye = vec4(xt, yt, zt, 0);
-
-    webgl_context.uniform4fv(uniform_light, light);
-    webgl_context.uniform4fv(uniform_eye, eye);
+    webgl_context.uniform4fv(uniform_light, flatten(light));
 
 
     // ==============================================
@@ -271,16 +278,12 @@ function draw() {
     // ==============================================
 
     // Set Mars transform
-    // webgl_context.uniform4f(uniform_props, 0, 0, 0, 1.0);
     webgl_context.uniform4f(uniform_trans, 0, 0, 0, 0);
-    // Set Mars props [xang, yang, zang, scale]
+    mars_y_rot = (mars_y_rot + 1) % 360;
+    let mars_rotation_radian = radians(mars_y_rot);
+    webgl_context.uniform4f(uniform_props, 0, mars_rotation_radian, 0, 1.0);
 
-    // Mars self-rotation
-    mars_y_rot = (mars_y_rot + 1) % 360;  // Mars rotation angle increment
-    let mars_rot_y_rad = radians(mars_y_rot);
-
-    // Draw Mars
-    webgl_context.uniform4f(uniform_props, 0, mars_rot_y_rad, 0, 1.0);
+    // Set Mars color
     webgl_context.uniform4f(uniform_color, 0.70, 0.13, 0.13, 1.0);
     webgl_context.drawArrays(webgl_context.TRIANGLES, 0, mgs_index);
 
@@ -288,24 +291,22 @@ function draw() {
     // Render MGS
     // ==============================================
 
-    // Set MGS transform
-    webgl_context.uniform4f(uniform_props, 0, 0, 0, 0.3);
-    // // Set MGS props [xang, yang, zang, scale]
-    webgl_context.uniform4f(uniform_trans, 0, 0, 0, 0);
-
-    // Calculate MGS orbital position
-    orbit_speed = (orbit_speed + orbit_speed_crd) % 360;
+    mgs_y_rot = (mgs_y_rot + 2) % 360;
+    let mgs_rotation_radian = radians(mgs_y_rot);
+    webgl_context.uniform4f( uniform_props, 0, mgs_rotation_radian, 0, 0.3);
+    
+    // calculate translations
     let phi = radians(orbit_angle_crd);
+    orbit_speed = (orbit_speed + orbit_speed_crd) % 360;
     let theta = radians(orbit_speed);
     let x = orbit_radius_crd * Math.sin(theta) * Math.cos(phi);
     let y = orbit_radius_crd * Math.sin(theta) * Math.sin(phi);
-    let z = orbit_radius_crd * Math.cos(theta);
+    let z = Math.cos(theta);
 
-
-    // Draw MGS   
-    webgl_context.uniform4f(uniform_trans, x, y, z, 1.0);  
-    webgl_context.uniform4f(uniform_color, 1.0, 0.84, 0.0, 1.0);
-    webgl_context.drawArrays(webgl_context.TRIANGLES, mgs_index, vertex_data.length - mgs_index);
+    // update Shader 
+    webgl_context.uniform4f( uniform_trans, x, y, z, 0);
+    webgl_context.uniform4f( uniform_color, 1.0, 0.84, 0.0, 1.0);
+    webgl_context.drawArrays( webgl_context.TRIANGLES, mgs_index, vertex_data.length - mgs_index);		
 }
 
 createVertexData();
